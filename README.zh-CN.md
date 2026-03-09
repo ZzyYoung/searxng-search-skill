@@ -6,10 +6,17 @@
 
 **版本：** `v0.2.0`
 
+**默认工作流：** `SearXNG discovery + official-page verification`
+
 ## 这是什么
 
 这个仓库 **不包含** 完整的 SearXNG 服务端本体。  
 它提供的是一个 **OpenClaw skill**，作用是告诉代理：**什么时候该用 SearXNG，以及怎样通过 HTTP API 去调用它。**
+
+它的目标工作方式是：
+- 先用 SearXNG 做结果发现
+- 对高价值事实问题优先偏向官方域名
+- 再打开官方页面核实后回答
 
 ## 它能做什么
 

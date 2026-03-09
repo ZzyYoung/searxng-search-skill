@@ -6,10 +6,17 @@ An OpenClaw skill for using a SearXNG instance as a privacy-friendly web search 
 
 **Version:** `v0.2.0`
 
+**Default workflow:** `SearXNG discovery + official-page verification`
+
 ## What this is
 
 This repository does **not** bundle or embed the full SearXNG server.
 It provides an **OpenClaw skill** that teaches the agent when and how to query a SearXNG instance over HTTP.
+
+Its intended operating model is:
+- use SearXNG to discover likely results
+- prefer official domains for high-value factual questions
+- open the official page and verify before answering
 
 ## What it does
 

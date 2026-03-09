@@ -7,6 +7,9 @@ description: Query a SearXNG instance as a replacement for Brave or other web-se
 
 Use SearXNG when web search should go through a SearXNG instance instead of Brave, Google, or another provider. Prefer JSON output when it works, but do not get stuck on it.
 
+Default workflow: **SearXNG discovery + official-page verification**.
+That means SearXNG is used to discover likely candidates quickly, then the best official source is opened and verified before presenting high-confidence answers.
+
 ## Quick Start
 
 1. Use the user-provided SearXNG base URL if available.
@@ -27,6 +30,15 @@ Example:
 ```text
 GET https://searx.example.org/search?q=openclaw&format=json
 ```
+
+## Default Workflow
+
+1. Use SearXNG to discover candidate results quickly.
+2. Bias toward official domains for version, release, changelog, download, and documentation queries.
+3. Open the strongest official result and verify the answer on the official page.
+4. Report the verified answer, not just the raw search ranking.
+
+Use SearXNG alone only for low-stakes discovery or when the user explicitly wants search-result summaries rather than verified facts.
 
 ## Instance Selection Workflow
 
