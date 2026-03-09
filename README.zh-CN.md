@@ -13,6 +13,9 @@
 
 - 说明什么时候适合用 SearXNG 替代 Brave 等搜索后端
 - 优先使用 `/search` 的 JSON 输出
+- 如果用户没有提供实例，自动尝试健康的公开 SearXNG 实例
+- 如果 JSON 被限流或禁用，自动回退到 HTML 搜索结果
+- 对“版本 / release / changelog”类问题，优先限定 `site:github.com` 或官方域名
 - 提供一个尽量稳定、可复用的搜索流程
 - 记录常用 API 参数，例如：
   - `q`

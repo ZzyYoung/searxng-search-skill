@@ -1,19 +1,20 @@
 ---
 name: searxng-search
-description: Query a SearXNG instance as a replacement for Brave or other web-search backends. Use when the user wants privacy-friendly web search, self-hosted/meta-search, or asks to search through a SearXNG instance via HTTP API endpoints such as /search with JSON output.
+description: Query a SearXNG instance as a replacement for Brave or other web-search backends. Use when the user wants privacy-friendly web search, self-hosted/meta-search, or asks to search through a SearXNG instance via HTTP API endpoints such as /search with JSON output. If no instance is provided, try healthy public SearXNG instances automatically before bothering the user.
 ---
 
 # SearXNG Search
 
-Use SearXNG when web search should go through a SearXNG instance instead of Brave, Google, or another provider. Prefer JSON output and keep requests simple and reproducible.
+Use SearXNG when web search should go through a SearXNG instance instead of Brave, Google, or another provider. Prefer JSON output when it works, but do not get stuck on it.
 
 ## Quick Start
 
-1. Confirm the SearXNG base URL or ask for it if missing.
-2. Call the search endpoint with `format=json`.
-3. Start with only `q` plus a small number of filters.
-4. Summarize top results with titles, URLs, and short notes.
-5. If needed, refine with engine, category, language, or time filters.
+1. Use the user-provided SearXNG base URL if available.
+2. If no instance is provided, automatically try healthy public SearXNG instances.
+3. Prefer `format=json` first.
+4. If JSON is blocked, rate-limited, or disabled, fall back to HTML search results.
+5. Summarize the best results with titles, URLs, and short notes.
+6. For version/release queries, bias toward official sources.
 
 Basic pattern:
 
@@ -27,54 +28,104 @@ Example:
 GET https://searx.example.org/search?q=openclaw&format=json
 ```
 
-## Recommended Workflow
+## Instance Selection Workflow
 
-### 1. Gather the minimum inputs
+### 1. Prefer explicit instances
 
-Need:
-- `baseUrl` of the SearXNG instance
-- search query
+Use these in order:
+- user-provided instance
+- documented local default in the environment
+- healthy public instances discovered from a public instance list such as `searx.space`
 
-Optional:
-- `language`
-- `time_range=day|month|year`
-- `engines`
-- `categories`
-- `safesearch`
-- page number
+Do not stop just because the user did not provide an instance.
 
-If the instance is unknown, ask for the instance URL or use a documented local default if the environment already defines one.
+### 2. Auto-try public instances when needed
 
-### 2. Prefer JSON results
+When no instance is configured, automatically try a small number of public HTTPS instances.
+
+Preferred behavior:
+- use normal HTTPS instances
+- prefer recent SearXNG versions
+- avoid long retry loops
+- try only a few candidates before switching strategy
+- if JSON endpoints return `429`, `403`, or transport failures, try another instance or use HTML mode
+
+### 3. Prefer fewer, smarter attempts
+
+Do not hammer public instances.
+
+Good default sequence:
+1. try JSON search on 2-4 candidates
+2. if rate-limited or blocked, open one candidate in the browser and use HTML search
+3. continue with the best available result source
+
+Only tell the user about instance-selection details if all attempts fail or if the user explicitly asks.
+
+## Query Construction
+
+### Normal search
+
+Start simple:
+- query only
+- `format=json`
+- optionally `language`
+- optionally `time_range`
+
+### Version and release queries
+
+For version checks, latest release questions, download versions, changelogs, tags, or package-release lookups, prefer official or authoritative sources.
+
+Refine the query before searching. Examples:
+
+```text
+zerotier latest version site:github.com
+zerotier latest release site:github.com
+openclaw release notes site:github.com
+zerotier 1.16.0 site:zerotier.com OR site:github.com
+```
+
+Bias order for version queries:
+1. official GitHub releases/tags
+2. official project site or docs
+3. package registries or vendor docs
+4. blogs and mirrors only as fallback
+
+If SearXNG returns noisy tutorial/blog results for a version query, rewrite the query with `site:github.com` or the official domain and search again without asking first.
+
+## JSON vs HTML Strategy
+
+### Prefer JSON first
 
 Use `format=json` whenever the goal is machine-readable search output.
 
-Example query template:
+Example:
 
 ```text
 {baseUrl}/search?q={query}&format=json&language=en&time_range=month
 ```
 
-Do not assume every instance enables JSON/CSV/RSS. If the instance returns 403 or ignores `format=json`, explain that the instance disabled that output format and fall back to HTML browsing if appropriate.
+### Fall back to HTML without drama
 
-### 3. Keep filters conservative
+Do not assume every instance enables JSON/CSV/RSS. If JSON is disabled or rate-limited:
+- switch to HTML search results on the same or another instance
+- use browser automation to inspect top results
+- keep the user-facing answer focused on the result, not the transport details
 
-Start broad, then narrow only when useful.
+## Result Evaluation
 
-Good first refinements:
-- `language` for language-specific queries
-- `time_range` for recent-news style requests
-- `categories` when the user wants images, news, videos, etc.
-- `engines` only when the user explicitly cares about the source or the instance mixes uneven-quality engines
-
-### 4. Report results cleanly
-
-For each high-value result, include:
+For each strong result, capture:
 - title
 - URL
 - one-line relevance note
 
-If the result set looks weak, say so and try a revised query.
+For version queries, prefer results that visibly contain:
+- `releases/tag/...`
+- `releases/latest`
+- official changelog pages
+- official download pages
+- explicit version strings near the project name
+
+If the result set looks weak, do not present low-confidence guesses as facts. Rewrite and retry with narrower official-source filters.
 
 ## Common API Parameters
 
@@ -92,13 +143,15 @@ Most useful parameters in practice:
 
 ## Failure Handling
 
-- If the instance is unreachable: report connectivity failure and ask for another instance or permission to troubleshoot.
-- If JSON output is disabled: explain the limitation clearly.
+- If one public instance is unreachable: silently try another.
+- If JSON output is disabled: switch to HTML mode.
+- If public instances return `429`: reduce attempts and switch strategy instead of looping.
 - If results are noisy: refine query terms before piling on many filters.
-- If the user wants a stable OpenClaw integration: recommend wiring the instance into a dedicated search tool or gateway config rather than manually repeating raw HTTP calls.
+- If all public-instance attempts fail: then tell the user you need a specific instance or another source.
+- If the user wants stable long-term use: recommend a self-hosted or trusted instance.
 
 ## Notes
 
 - SearXNG is a metasearch engine, not a general hosted search API with guaranteed schema stability across all public instances.
-- Public instances may differ in enabled engines, output formats, rate limits, and safesearch behavior.
+- Public instances differ in enabled engines, output formats, rate limits, and safesearch behavior.
 - For repeatable automation, prefer a self-hosted or trusted instance.

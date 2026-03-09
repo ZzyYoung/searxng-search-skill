@@ -13,6 +13,9 @@ It provides an **OpenClaw skill** that teaches the agent when and how to query a
 
 - Explain when to use SearXNG instead of Brave or other search backends
 - Prefer JSON search responses from `/search`
+- Automatically try healthy public SearXNG instances if no instance is provided
+- Fall back to HTML search results when JSON is rate-limited or disabled
+- For version/release queries, prefer official sources like `site:github.com` or the vendor domain
 - Provide a minimal, repeatable search workflow
 - Document common API parameters such as:
   - `q`
