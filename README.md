@@ -4,6 +4,8 @@ English | [中文说明](README.zh-CN.md)
 
 An OpenClaw skill for using a SearXNG instance as a privacy-friendly web search backend.
 
+**Version:** `v0.2.0`
+
 ## What this is
 
 This repository does **not** bundle or embed the full SearXNG server.
