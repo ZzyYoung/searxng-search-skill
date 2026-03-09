@@ -4,7 +4,7 @@
 
 这是一个给 **OpenClaw** 使用的 skill，用来指导代理通过 **SearXNG 实例** 完成隐私友好的网页搜索。
 
-**版本：** `v0.2.0`
+**版本：** `v0.2.1`
 
 **默认工作流：** `SearXNG discovery + official-page verification`
 
